@@ -1,6 +1,6 @@
 # Wortland – Grammatik-Abenteuer für DaZ
 
-Spielerischer Grammatiktrainer für Schülerinnen und Schüler mit Deutsch als Zweitsprache (Anfänger, etwa A1–A2). Aufgebaut wie Naturalia: Weltkarte mit Orten, Story, Endgegner, Challenges, Abzeichen und Spielstand zum Sichern. Die Inhalte bauen auf den Grammatik-Kategorien des Kanti-Trainers Deutsch auf, sind aber für Anfänger neu geschrieben (einfache Sprache, Bilder, Vorlesen).
+Spielerischer Grammatiktrainer für Schülerinnen und Schüler mit Deutsch als Zweitsprache (Anfänger, etwa A1–A2). Aufgebaut wie Naturalia: Weltkarte mit Orten, Story, Endgegner, Challenges, Abzeichen und Spielstand zum Sichern. Die Inhalte bauen auf den Grammatik-Kategorien des Kanti-Trainers Deutsch auf, sind aber für Anfänger neu geschrieben (einfache Sprache, Bilder).
 
 ## Die Geschichte
 
@@ -44,10 +44,6 @@ Der Wirrwarr hat im Wortland alle Wörter durcheinandergewirbelt. Lumi, die Eule
 - **Sanduhr-Jagd:** 60 Sekunden, so viele richtig wie möglich (Rekord wird gespeichert, verändert die Stufe nicht)
 - **Fehlerkiste:** alte Fehler aus allen Orten üben
 - Serie 🔥 (Tage nacheinander), Ränge nach XP (Ei bis Wortdrache), 15 Abzeichen
-
-## Vorlesen
-
-Story, Regeln und Aufgaben haben einen 🔊-Knopf. Das nutzt die Sprachausgabe des Browsers (deutsche Stimme, de-CH falls vorhanden). Auf manchen Geräten fehlt eine deutsche Stimme, dann klingt es schlecht oder bleibt stumm. In den Einstellungen gibt es einen Stimmtest und «Aufgaben automatisch vorlesen».
 
 ## Spielstand
 

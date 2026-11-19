@@ -29,7 +29,6 @@ const PRAISE = ['Super!', 'Richtig!', 'Toll gemacht!', 'Genau!', 'Stark!', 'Prim
 const COMFORT = ['Fast!', 'Nicht schlimm.', 'Das lernst du noch.', 'Fehler helfen beim Lernen.'];
 const LUMI_TIPS = [
   'Lerne jedes Nomen mit Artikel: der Hund, die Katze, das Haus.',
-  'Tippe auf 🔊, dann lese ich dir vor.',
   'Fehler kommen in die Fehlerkiste. Übe sie später nochmals!',
   'Jeden Tag ein bisschen ist besser als einmal ganz viel.',
   'Das Verb steht im Satz auf Platz 2.',
@@ -41,7 +40,7 @@ const LUMI_TIPS = [
 /* ---------- Zustand ---------- */
 function blank() {
   return { v: 1, name: '', start: 1, xp: 0, streak: 0, lastDay: null, realms: {}, boss: {}, daily: { day: -1 }, dailyCount: 0, blitzBest: 0,
-    badges: {}, fixed: 0, perfect: 0, sound: true, autoRead: false, allOpen: false, seenStart: false, created: Date.now() };
+    badges: {}, fixed: 0, perfect: 0, sound: true, allOpen: false, seenStart: false, created: Date.now() };
 }
 let S = blank();
 let memoryOnly = false;
@@ -95,7 +94,7 @@ function checkBadges() {
   if (REALMS.every(r => rs(r.id).stars >= 3)) award('meister');
 }
 
-/* ---------- Ton und Vorlesen ---------- */
+/* ---------- Ton ---------- */
 let AC = null;
 function beep(ok) {
   if (!S.sound) return;
@@ -110,38 +109,17 @@ function beep(ok) {
     });
   } catch (e) { /* ohne Ton weiter */ }
 }
-let VOICE = null;
-function pickVoice() {
-  if (!window.speechSynthesis) return;
-  const vs = speechSynthesis.getVoices().filter(v => /^de/i.test(v.lang));
-  VOICE = vs.find(v => /de-CH/i.test(v.lang)) || vs.find(v => /de-DE/i.test(v.lang) && /google|natural|premium|enhanced/i.test(v.name)) || vs.find(v => /de-DE/i.test(v.lang)) || vs[0] || null;
-}
-if (window.speechSynthesis) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
-const canSpeak = () => !!window.speechSynthesis;
-function speak(html) {
-  if (!canSpeak()) return;
-  const t = strip(html).replace(/_{3}/g, ' … ').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}]/gu, '').replace(/[«»]/g, '').replace(/→/g, ', ').replace(/\s+/g, ' ').trim();
-  if (!t) return;
-  speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(t);
-  u.lang = VOICE ? VOICE.lang : 'de-DE'; if (VOICE) u.voice = VOICE; u.rate = 0.88;
-  speechSynthesis.speak(u);
-}
-const sayBtn = (key, label) => canSpeak() ? `<button class="say" data-act="say" data-key="${key}" aria-label="${label || 'Vorlesen'}" title="Vorlesen">🔊</button>` : '';
-
 /* ---------- Oberfläche ---------- */
-const ui = { view: 'map', realm: null, boss: null, newBadges: [], toast: '', saveMsg: '', loadInfo: null, confirmReset: false, renaming: false, sayMap: {} };
+const ui = { view: 'map', realm: null, boss: null, newBadges: [], toast: '', saveMsg: '', loadInfo: null, confirmReset: false, renaming: false };
 let R = null; // laufende Runde
 const app = () => document.getElementById('app');
 
 function go(view, extra) {
   Object.assign(ui, { view }, extra || {});
-  if (window.speechSynthesis) speechSynthesis.cancel();
   render();
   window.scrollTo(0, 0);
 }
 function render() {
-  ui.sayMap = {};
   let h;
   if (!S.name) h = viewStart();
   else switch (ui.view) {
@@ -161,7 +139,6 @@ function render() {
   ui.toast = '';
   afterRender();
 }
-function say(key, html) { ui.sayMap[key] = html; return sayBtn(key); }
 
 function topbar(title, back) {
   const rk = RANKS[rankOf(S.xp)];
@@ -172,7 +149,7 @@ function topbar(title, back) {
   </header>`;
 }
 function lumi(text, key) {
-  return `<div class="lumi"><div class="owl" aria-hidden="true">🦉</div><div class="bubble"><p>${text}</p>${say(key || 'lumi', text)}</div></div>`;
+  return `<div class="lumi"><div class="owl" aria-hidden="true">🦉</div><div class="bubble"><p>${text}</p></div></div>`;
 }
 
 /* ---------- Start ---------- */
@@ -277,7 +254,7 @@ function viewRealm() {
   return `${topbar(`${r.icon} ${r.name}`, 'map')}
   <main class="wrap" style="--c:${r.color}">
     <div class="realmhead"><span class="rico">${r.icon}</span><div><span class="tag">Ort ${i + 1} · ${esc(r.topic)}</span><h1>${r.name}</h1><p class="stars big" aria-label="${s.stars} von 3 Sternen">${stars(s.stars)}</p></div></div>
-    <section class="card story"><p class="npc">${r.npc}</p><p>${r.intro}</p>${say('intro', r.intro)}</section>
+    <section class="card story"><p class="npc">${r.npc}</p><p>${r.intro}</p></section>
     ${s.outro ? `<section class="card story won"><p>💎 ${r.outro}</p></section>` : ''}
     <section class="card"><h2>Deine Stufe</h2>${lvlMeter(s.s)}</section>
     <div class="actions">
@@ -298,7 +275,7 @@ function viewRule() {
   const r = curRealm();
   return `${topbar('📜 Regel', 'realm')}
   <main class="wrap" style="--c:${r.color}">
-    <section class="card scroll"><div class="scrollhead"><span class="tag">${r.icon} ${r.name}</span><h1>${esc(r.topic)}</h1>${say('rule', r.rule)}</div><div class="rule">${r.rule}</div></section>
+    <section class="card scroll"><div class="scrollhead"><span class="tag">${r.icon} ${r.name}</span><h1>${esc(r.topic)}</h1></div><div class="rule">${r.rule}</div></section>
     <button class="btn primary big block" data-act="play">⚔️ Jetzt üben</button>
   </main>`;
 }
@@ -311,7 +288,7 @@ function viewStory() {
     BOSSES.forEach(b => { if (b.after === i + 1 && bossRec(b.id).tries) parts.push(`<h3>${b.icon} ${b.name}</h3><p>${b.intro}</p>${bossRec(b.id).won ? `<p>🏆 ${b.win}</p>` : ''}`); });
   });
   const txt = parts.join('');
-  return `${topbar('📖 Geschichte', 'map')}<main class="wrap"><section class="card scroll">${say('story', txt)}${txt}<p class="small"><i>Fortsetzung folgt … Spiel weiter, dann erfährst du mehr.</i></p></section></main>`;
+  return `${topbar('📖 Geschichte', 'map')}<main class="wrap"><section class="card scroll">${txt}<p class="small"><i>Fortsetzung folgt … Spiel weiter, dann erfährst du mehr.</i></p></section></main>`;
 }
 
 /* ---------- Runden ---------- */
@@ -434,9 +411,7 @@ function proceed() {
   nextQ();
   render();
   window.scrollTo(0, 0);
-  if (S.autoRead) speakQ();
 }
-function speakQ() { const q = R.q; speak((q.lead || '') + '. ' + (q.kind === 'order' ? '' : (q.q || ''))); }
 
 function finish() {
   R.done = true;
@@ -469,7 +444,6 @@ function finish() {
   save();
   ui.res = res;
   go('summary');
-  if (res.firstCrystal) speak(REALMS.find(r => r.id === R.id).outro);
 }
 
 /* ---------- Sanduhr ---------- */
@@ -506,7 +480,7 @@ function viewPlay() {
   const prog = R.mode === 'blitz' ? '' : `<div class="dots" aria-label="Aufgabe ${R.k + 1} von ${R.total}">${Array.from({ length: R.total }, (_, i) => `<i class="${i < R.log.length ? (R.log[i].ok ? 'g' : 'b') : i === R.k ? 'c' : ''}"></i>`).join('')}</div>`;
   const lv = q.l ? `<span class="qlvl" title="Stufe der Aufgabe">${LVL[q.l].icon} Stufe ${q.l}</span>` : '';
   const realmTag = R.mode !== 'realm' && R.mode !== 'errrealm' ? `<span class="tag">${realm.icon} ${esc(realm.topic)}</span>` : '';
-  const lead = `<p class="lead">${q.lead || ''} ${say('q', (q.lead || '') + '. ' + (q.kind === 'order' ? '' : (q.q || '')))}</p>`;
+  const lead = `<p class="lead">${q.lead || ''}</p>`;
   let body = '';
   const done = R.answered;
   if (q.kind === 'mc') {
@@ -563,7 +537,7 @@ function viewSummary() {
     head = `<div class="sumhead"><span class="big">${res.ok >= 7 ? '🏆' : res.ok >= 5 ? '🎉' : '💪'}</span><h1>${res.ok} von ${res.total} richtig</h1><p class="stars big">${stars(s.stars)}</p></div>`;
     if (res.newStars) head += `<p class="center"><b>Neu: ${res.newStars} ${res.newStars === 1 ? 'Stern' : 'Sterne'}!</b></p>`;
     if (res.endL !== res.startL) head += `<p class="center lvlmsg">${res.endL > res.startL ? `Du bist aufgestiegen: ${LVL[res.endL].icon} <b>Stufe ${res.endL}</b>!` : `Jetzt ${LVL[res.endL].icon} Stufe ${res.endL}. So lernst du sicher weiter.`}</p>`;
-    if (res.firstCrystal) story = `<section class="card story won crystal"><div class="gem">💎</div><p>${r.outro}</p>${say('outro', r.outro)}</section>`;
+    if (res.firstCrystal) story = `<section class="card story won crystal"><div class="gem">💎</div><p>${r.outro}</p></section>`;
     else if (res.mode === 'realm' && s.stars < 1) story = lumi('Für den Wort-Kristall brauchst du 5 von 8 richtig. Lies vielleicht zuerst die Regel. Du schaffst das!', 'sum');
     const idx = REALMS.indexOf(r);
     const nextB = BOSSES.find(b => b.after === idx + 1);
@@ -574,7 +548,7 @@ function viewSummary() {
   } else if (res.mode === 'boss') {
     const b = BOSSES.find(x => x.id === res.id);
     head = `<div class="sumhead"><span class="big">${res.won ? '🏆' : b.icon}</span><h1>${res.won ? 'Gewonnen!' : 'Diesmal nicht …'}</h1><p>${res.ok} von ${res.total} richtig</p></div>`;
-    story = `<section class="card story ${res.won ? 'won' : ''}"><p>${res.won ? b.win : b.lose}</p>${say('boss', res.won ? b.win : b.lose)}</section>`;
+    story = `<section class="card story ${res.won ? 'won' : ''}"><p>${res.won ? b.win : b.lose}</p></section>`;
     btns = `${res.won ? '' : `<button class="btn primary big block" data-act="bossgo" data-id="${b.id}">Nochmals kämpfen</button>`}<button class="btn big block${res.won ? ' primary' : ''}" data-act="map">Zur Karte</button>`;
     if (res.won && b.id === 'wirrwarr') head += '<div class="confetti" aria-hidden="true">🎊🎉✨🎊🎉✨</div>';
   } else if (res.mode === 'blitz') {
@@ -599,7 +573,7 @@ function viewBoss() {
   return `${topbar(`${b.icon} Endgegner`, 'map')}
   <main class="wrap" style="--c:${b.color}">
     <div class="bossintro"><span class="bossbig">${b.icon}</span><h1>${b.name}</h1></div>
-    <section class="card story"><p>${b.intro}</p>${say('bi', b.intro)}</section>
+    <section class="card story"><p>${b.intro}</p></section>
     <section class="card"><h2>Regeln</h2><ul><li>${BOSS_Q} Fragen aus allen Orten bis hier.</li><li>Du hast ${BOSS_HEARTS} Herzen ❤️. Bei jedem Fehler verlierst du eins.</li><li>Kein Hinweis-Knopf.</li><li>Die Fragen passen zu deiner Stufe in jedem Ort.</li></ul>
     <p class="small">${rec.tries ? `Versuche: ${rec.tries} · Bestes Ergebnis: ${rec.best} von ${BOSS_Q}${rec.won ? ' · besiegt ✔' : ''}` : 'Noch nie gekämpft.'}</p></section>
     <button class="btn primary big block" data-act="bossgo" data-id="${b.id}">⚔️ Kampf beginnen</button>
@@ -640,8 +614,6 @@ function viewSettings() {
   <main class="wrap">
     <section class="card"><h2>Ton</h2>
       <label class="sw"><input type="checkbox" data-set="sound" ${S.sound ? 'checked' : ''}> Töne bei richtig und falsch</label>
-      <label class="sw"><input type="checkbox" data-set="autoRead" ${S.autoRead ? 'checked' : ''}> Aufgaben automatisch vorlesen</label>
-      ${canSpeak() ? `<p class="small">Stimme: ${VOICE ? esc(VOICE.name) : 'Standard'} <button class="linkbtn" data-act="testvoice">Test</button></p>` : '<p class="small">Dieser Browser kann leider nicht vorlesen.</p>'}
     </section>
     <section class="card"><h2>Spielername</h2>
       ${ui.renaming ? `<div class="namerow"><input id="nameIn" class="field" maxlength="20" value="${esc(S.name)}"><button class="btn primary" data-act="rename">OK</button></div><p class="err" id="nameErr"></p>` : `<p><b>${esc(S.name)}</b> <button class="linkbtn" data-act="renameedit">ändern</button></p>`}
@@ -737,13 +709,12 @@ document.addEventListener('click', e => {
   const b = e.target.closest('[data-act]'); if (!b || b.disabled) return;
   const a = b.dataset.act, id = b.dataset.id;
   switch (a) {
-    case 'say': speak(ui.sayMap[b.dataset.key] || ''); break;
     case 'randname': { const v = pick(NICK_A) + ' ' + pick(NICK_B); ui.nameDraft = v; document.getElementById('nameIn').value = v; break; }
     case 'startlvl': ui.nameDraft = (document.getElementById('nameIn') || {}).value || ''; ui.startLvl = +b.dataset.l; render(); break;
     case 'begin': {
       const err = setName(document.getElementById('nameIn').value);
       if (err) { document.getElementById('nameErr').textContent = err; return; }
-      S.start = ui.startLvl || 1; S.created = Date.now(); save(); go('map'); speak(`Hallo ${S.name}! Tippe auf den leuchtenden Ort. Dort beginnt dein Abenteuer.`); break;
+      S.start = ui.startLvl || 1; S.created = Date.now(); save(); go('map'); break;
     }
     case 'map': R = null; S.seenStart = true; save(); go('map'); break;
     case 'locked': ui.toast = '🔒 Dieser Ort ist noch gesperrt. Hol zuerst den Kristall im Ort davor.'; render(); break;
@@ -801,7 +772,6 @@ document.addEventListener('click', e => {
     case 'loadcode': tryLoad(document.getElementById('loadCode').value); break;
     case 'loadyes': S = Object.assign(blank(), ui.loadInfo); ui.loadInfo = null; save(); ui.toast = '✔ Spielstand geladen. Willkommen zurück, ' + esc(S.name) + '!'; go('map'); break;
     case 'loadno': ui.loadInfo = null; render(); break;
-    case 'testvoice': speak('Hallo! Ich bin Lumi, die Eule. Ich lese dir vor.'); break;
     case 'renameedit': ui.renaming = true; render(); break;
     case 'rename': { const old = S.name, err = setName(document.getElementById('nameIn').value); if (err) { S.name = old; document.getElementById('nameErr').textContent = err; return; } ui.renaming = false; save(); render(); break; }
     case 'reset': ui.confirmReset = true; render(); break;

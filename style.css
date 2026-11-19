@@ -114,12 +114,8 @@ details.card[open] summary { margin-bottom: 10px; }
 .lumi { display: flex; gap: 10px; align-items: flex-start; }
 .owl { font-size: 3rem; line-height: 1; animation: bob 3s ease-in-out infinite; flex: none; }
 @keyframes bob { 50% { transform: translateY(-5px) rotate(-4deg); } }
-.bubble { position: relative; flex: 1; background: var(--surface); border: 2px solid var(--line); border-radius: 14px; padding: 12px 48px 12px 14px; box-shadow: var(--shadow); }
+.bubble { position: relative; flex: 1; background: var(--surface); border: 2px solid var(--line); border-radius: 14px; padding: 12px 14px; box-shadow: var(--shadow); }
 .bubble::before { content: ""; position: absolute; left: -10px; top: 18px; border: 8px solid transparent; border-right-color: var(--line); border-left: 0; }
-.say { position: absolute; top: 8px; right: 8px; width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--line-soft); background: var(--subtle); cursor: pointer; font-size: 1.1rem; }
-.say:hover { border-color: var(--gold); }
-.lead .say, .scrollhead .say { position: static; vertical-align: middle; margin-left: 6px; }
-.card.story, .card.scroll { position: relative; padding-right: 56px; }
 
 /* Rang */
 .rankbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-family: var(--font-ui); }
